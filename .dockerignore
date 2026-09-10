@@ -1,0 +1,10 @@
+.venv
+.env
+.data
+node_modules
+web/node_modules
+web/.next
+web/.next
+**/__pycache__
+demo-take
+.git

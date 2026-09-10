@@ -4,10 +4,13 @@ import { join } from "node:path";
 // The desk serves the agent's own state files: no mock data anywhere.
 // Chain integrity is verified by the single writer (agent/ledger.py publishes
 // chain.json on every append); the UI reads that verdict, it never re-derives
-// it. VERGER_DATA overrides; default assumes dev runs from web/.
-export const DATA_DIR =
-  process.env.VERGER_DATA ?? join(process.cwd(), "..", ".data");
-export const REPO_ROOT = join(process.cwd(), "..");
+// it. In containers REPO_ROOT/VERGER_DATA are set explicitly; the default
+// assumes dev runs from web/.
+export const REPO_ROOT = process.env.REPO_ROOT ?? join(process.cwd(), "..");
+export const DATA_DIR = process.env.VERGER_DATA ?? join(REPO_ROOT, ".data");
+// Containers get the system venv; local dev uses the repo venv.
+export const PYTHON_BIN =
+  process.env.PYTHON_BIN ?? join(REPO_ROOT, ".venv", "bin", "python");
 
 export type Receipt = {
   seq: number;

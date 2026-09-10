@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
 import { execFile } from "node:child_process";
-import { REPO_ROOT } from "@/lib/state";
+import { PYTHON_BIN, REPO_ROOT } from "@/lib/state";
 
 // Trustee decision: resumes the agent session through the proven CLI and
 // waits for it (a resumed round can take a couple of minutes on Groq).
-const PYTHON = `${REPO_ROOT}/.venv/bin/python`;
-const CLI = `${REPO_ROOT}/agent/cli.py`;
-
 function decide(id: string, decision: string): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile(
-      PYTHON,
-      [CLI, "decide", id, decision],
+      PYTHON_BIN,
+      [`${REPO_ROOT}/agent/cli.py`, "decide", id, decision],
       { cwd: REPO_ROOT, timeout: 240000, maxBuffer: 1024 * 1024, encoding: "utf8" },
       (err, stdout) => {
         if (err && !stdout) return reject(err);
