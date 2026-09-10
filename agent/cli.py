@@ -22,7 +22,7 @@ from agent.ledger import Ledger  # noqa: E402
 from agent.verger import (  # noqa: E402
     DATA_DIR,
     _load_pending,
-    resume_with,
+    execute_decision,
     start_round,
 )
 
@@ -43,9 +43,9 @@ def main() -> None:
         decision = sys.argv[3] if len(sys.argv) > 3 else "approve"
         ids = sys.argv[4:] or None
         if target == "all":
-            print(json.dumps(resume_with(decision, None), indent=2))
+            print(json.dumps(execute_decision(decision, None), indent=2))
         else:
-            print(json.dumps(resume_with(decision, target), indent=2))
+            print(json.dumps(execute_decision(decision, target), indent=2))
     elif cmd == "receipts":
         ledger = Ledger(os.path.join(DATA_DIR, "receipts.jsonl"))
         for row in ledger.rows:

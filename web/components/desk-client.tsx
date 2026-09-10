@@ -81,7 +81,7 @@ export function DeskClient({ initialState }: { initialState: State }) {
       if (out.ok) {
         setFlash(
           decision === "approve"
-            ? `Approved. The round resumed and the reply went out: ${item.reason.subject ?? ""} · receipt recorded.`
+            ? `Approved. The reply went out: ${item.reason.subject ?? ""} · receipt recorded. A fresh round is reading the rest of the inbox.`
             : `Denied. Verger was told no; the draft was cancelled and the denial is on the ledger.`,
         );
       } else {
@@ -182,7 +182,7 @@ export function DeskClient({ initialState }: { initialState: State }) {
                     onClick={() => void decide(p, "approve")}
                     disabled={decidingId === p.id}
                   >
-                    {decidingId === p.id ? "Resuming the round…" : "Approve · send it"}
+                    {decidingId === p.id ? "Sending…" : "Approve · send it"}
                   </button>
                   <button
                     className="btn btn-ghost text-sm"

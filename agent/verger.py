@@ -179,29 +179,43 @@ def start_round() -> dict:
     return run_round(build_agent(sid))
 
 
-def resume_with(decision: str, interrupt_id: str | None = None) -> dict:
-    """Trustee decided. Resume the session, feeding every interrupt a response."""
-    sid = _current_session()
-    if not sid:
-        return {"stop_reason": "no-active-round", "still_pending": len(_load_pending())}
-    agent = build_agent(sid)
+def execute_decision(decision: str, interrupt_id: str | None = None) -> dict:
+    """Trustee decided. Execute deterministically; never bet on a paused session.
+
+    The pending item holds the full draft, so approval sends EXACTLY what the
+    trustee saw (policy re-checked), denial records the refusal, and either way
+    the paused round is closed. A fresh round picks up the remaining inbox.
+    """
     pending = _load_pending()
     targets = [interrupt_id] if interrupt_id else list(pending.keys())
-    responses = [
-        {"interruptResponse": {"interruptId": iid, "response": decision}}
-        for iid in targets
-    ]
-    for iid in targets:
-        pending.pop(iid, None)
-    result = agent(responses)
-    _save_pending(pending)
-    while result.stop_reason == "interrupt":
-        pending = _load_pending()
-        for intr in result.interrupts:
-            pending[intr.id] = {"id": intr.id, "name": intr.name, "reason": intr.reason}
-            ledger.append("send_awaiting", {"interrupt_id": intr.id, "reason": intr.reason})
-        _save_pending(pending)
-        break
-    if not pending and result.stop_reason != "interrupt":
+    if not targets:
+        return {"stop_reason": "nothing-pending", "still_pending": 0}
+    # the paused round is dead either way; its session is retired
+    sid = _current_session()
+    if sid:
+        import shutil
+
+        shutil.rmtree(os.path.join(DATA_DIR, "session", f"session_{sid}"), ignore_errors=True)
         os.remove(_session_path())
-    return {"stop_reason": str(result.stop_reason), "still_pending": len(pending)}
+
+    item = pending[targets[0]]
+    to = item["reason"].get("to", "")
+    subject = item["reason"].get("subject", "")
+    ok, why = gate(to)
+    if not ok:
+        ledger.append("send_blocked", {"to": to, "subject": subject, "why": why, "interrupt_id": item["id"]})
+        pending.pop(item["id"], None)
+        _save_pending(pending)
+        return {"stop_reason": "blocked", "still_pending": len(pending)}
+
+    if decision.strip().lower() in ("approve", "y", "yes"):
+        ledger.append("send_approved", {"to": to, "subject": subject, "interrupt_id": item["id"]})
+        mid = mail.send_mail(to, subject, item["reason"].get("body", ""))
+        ledger.append("mail_sent", {"to": to, "subject": subject, "message_id": mid})
+        outcome = "sent"
+    else:
+        ledger.append("send_denied", {"to": to, "subject": subject, "interrupt_id": item["id"]})
+        outcome = "denied"
+    pending.pop(item["id"], None)
+    _save_pending(pending)
+    return {"stop_reason": outcome, "still_pending": len(pending)}
