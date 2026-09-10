@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+/*
+  Verger semantic tokens. Warm parish-paper field, AWS smile-orange accent.
+  All values below are mined or derived from a0.awsstatic.com live CSS (Sep 9)
+  except the paper family, which is the DESIGN_LEDGER decision for this build.
+  Components reference roles only: zero raw hex outside this file.
+*/
+:root {
+  /* Elevation ladder: base < surface < subtle < overlay */
+  --bg-base: #f8f3ea; /* warm parish paper, the village-hall field */
+  --bg-surface: #fffcf5; /* cards sit a half-step lighter than paper */
+  --bg-subtle: #f0e9db; /* insets, hover, the inside of a tray */
+  --bg-overlay: #ffffff; /* popovers; gets the only real shadow */
+
+  /* Text tiers: exactly three */
+  --text-primary: #232f3e; /* AWS Squid Ink, mined */
+  --text-secondary: #545b64; /* AWS slate, mined */
+  --text-muted: #7d858c; /* derived: slate tinted toward paper */
+
+  /* Border scale: hairlines only, no shadows below overlay */
+  --border-default: rgba(35, 47, 62, 0.14);
+  --border-strong: rgba(35, 47, 62, 0.26);
+
+  /* Accent triple: AWS smile orange, mined (#eb5f07 = their deep/hover) */
+  --accent: #fa6f00;
+  --accent-deep: #eb5f07;
+  --accent-subtle: #fdeada; /* accent tinted into the paper family */
+  --accent-foreground: #ffffff;
+
+  /* Status scale: receipt-green is RESERVED for verified-sent state */
+  --status-success: #2e7d4f;
+  --status-pending: #545b64;
+  --status-error: #b3261e;
+  --status-neutral: #545b64;
+
+  /* RGB twins for Tailwind opacity modifiers */
+  --accent-rgb: 250 111 0;
+  --ink-rgb: 35 47 62;
+
+  /* Radius: modest, parish-hall not startup-glass */
+  --radius-input: 8px;
+  --radius-card: 10px;
+  --radius-pill: 999px;
+
+  /* Type roles: humanist serif carries display; Geist carries the work */
+  --font-display: var(--font-fraunces), Georgia, serif;
+}
+
+@theme inline {
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-subtle: var(--bg-subtle);
+  --color-overlay: var(--bg-overlay);
+  --color-ink: var(--text-primary);
+  --color-ink-2: var(--text-secondary);
+  --color-ink-3: var(--text-muted);
+  --color-line: var(--border-default);
+  --color-line-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-ink: var(--accent-foreground);
+  --color-sent: var(--status-success);
+  --color-waiting: var(--status-pending);
+  --color-error: var(--status-error);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
+  --radius-input: var(--radius-input);
+  --radius-card: var(--radius-card);
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* ---- class layer ---- */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 560;
+  letter-spacing: -0.015em;
+  line-height: 1.04;
+}
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-card);
+}
+
+.micro {
+  /* 12px uppercase tracked microcopy */
+  font-size: 0.75rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.number-lg {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.btn {
+  /* 44px target: Fitts */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  padding: 0 1.25rem;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+.btn-primary:hover {
+  background: var(--accent-deep);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+}
+.btn-ghost:hover {
+  background: var(--bg-subtle);
+}
+
+.input {
+  min-height: 44px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-input);
+  padding: 0 0.75rem;
+  color: var(--text-primary);
+}
+.input:focus {
+  border-color: var(--accent);
+  outline: 2px solid rgb(var(--accent-rgb) / 0.25);
+  outline-offset: 1px;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--border-default);
+}
+
+:focus-visible {
+  outline: 3px solid rgb(var(--accent-rgb) / 0.55);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
