@@ -19,9 +19,18 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Verger",
+  title: {
+    default: "Verger",
+    template: "%s · Verger",
+  },
   description:
     "The front-desk agent for volunteer-run organizations. It answers the inbox, does the follow-up, and shows you a receipt for everything it did.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+};
+
+export const viewport = {
+  themeColor: "#f8f3ea",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
