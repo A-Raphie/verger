@@ -9,6 +9,7 @@ process (verger decide).
 
 import json
 import os
+import uuid
 
 from openai import OpenAI
 from strands import Agent, tool
@@ -21,7 +22,6 @@ from agent.ledger import Ledger
 from agent.policy import ALLOWLIST, ORG_NAME, SYSTEM_PROMPT, gate
 
 DATA_DIR = os.environ.get("VERGER_DATA", os.path.join(os.path.dirname(__file__), "..", ".data"))
-SESSION_ID = "verger-org-desk"
 
 _seen: set[str] = set()  # processed Message-IDs for O(1) membership across the round
 ledger = Ledger(os.path.join(DATA_DIR, "receipts.jsonl"))
@@ -84,7 +84,7 @@ class TrusteeGate(HookProvider):
             ledger.append("send_approved", {"to": to, "subject": subject})
 
 
-def build_agent() -> Agent:
+def build_agent(session_id: str) -> Agent:
     key = os.environ["GROQ_API_KEY"]
     model = OpenAIModel(
         client_args={
@@ -101,7 +101,7 @@ def build_agent() -> Agent:
         tools=[read_inbox, read_message, send_mail],
         hooks=[TrusteeGate()],
         callback_handler=None,
-        session_manager=FileSessionManager(session_id=SESSION_ID, storage_dir=os.path.join(DATA_DIR, "session")),
+        session_manager=FileSessionManager(session_id=session_id, storage_dir=os.path.join(DATA_DIR, "session")),
     )
 
 
@@ -122,6 +122,24 @@ def _save_pending(items: dict) -> None:
         json.dump(items, f, indent=2, sort_keys=True)
 
 
+def _session_path() -> str:
+    return os.path.join(DATA_DIR, "current-session")
+
+
+def _current_session() -> str | None:
+    if os.path.exists(_session_path()):
+        with open(_session_path()) as f:
+            return f.read().strip() or None
+    return None
+
+
+def _start_session() -> str:
+    sid = f"round-{uuid.uuid4().hex[:10]}"
+    with open(_session_path(), "w") as f:
+        f.write(sid)
+    return sid
+
+
 def run_round(agent: Agent) -> dict:
     """Run one round until it ends or pauses on trustee decisions."""
     result = agent(f"It's Monday morning. Do your round for {ORG_NAME}.")
@@ -138,6 +156,9 @@ def run_round(agent: Agent) -> dict:
             ledger.append("send_awaiting", {"interrupt_id": intr.id, "reason": intr.reason})
         _save_pending(pending)
         break  # unattended run ends here; the trustee decides on their time
+    if not pending and result.stop_reason != "interrupt":
+        # the round completed: archive the session so the next round starts fresh
+        os.remove(_session_path())
     return {
         "stop_reason": str(result.stop_reason),
         "pending_total": len(pending),
@@ -145,9 +166,25 @@ def run_round(agent: Agent) -> dict:
     }
 
 
+def start_round() -> dict:
+    """Public entry for the CLI: refuse a new round while one is paused, else start fresh."""
+    pending = _load_pending()
+    if pending:
+        return {
+            "stop_reason": "refused",
+            "pending_total": len(pending),
+            "note": "a round is paused awaiting trustee decisions; decide first",
+        }
+    sid = _start_session()
+    return run_round(build_agent(sid))
+
+
 def resume_with(decision: str, interrupt_id: str | None = None) -> dict:
     """Trustee decided. Resume the session, feeding every interrupt a response."""
-    agent = build_agent()
+    sid = _current_session()
+    if not sid:
+        return {"stop_reason": "no-active-round", "still_pending": len(_load_pending())}
+    agent = build_agent(sid)
     pending = _load_pending()
     targets = [interrupt_id] if interrupt_id else list(pending.keys())
     responses = [
@@ -165,4 +202,6 @@ def resume_with(decision: str, interrupt_id: str | None = None) -> dict:
             ledger.append("send_awaiting", {"interrupt_id": intr.id, "reason": intr.reason})
         _save_pending(pending)
         break
+    if not pending and result.stop_reason != "interrupt":
+        os.remove(_session_path())
     return {"stop_reason": str(result.stop_reason), "still_pending": len(pending)}

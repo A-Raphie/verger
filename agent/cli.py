@@ -19,13 +19,18 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
 from agent.ledger import Ledger  # noqa: E402
-from agent.verger import DATA_DIR, _load_pending, build_agent, resume_with, run_round  # noqa: E402
+from agent.verger import (  # noqa: E402
+    DATA_DIR,
+    _load_pending,
+    resume_with,
+    start_round,
+)
 
 
 def main() -> None:
     cmd = sys.argv[1] if len(sys.argv) > 1 else "help"
     if cmd == "run":
-        print(json.dumps(run_round(build_agent()), indent=2))
+        print(json.dumps(start_round(), indent=2))
     elif cmd == "pending":
         items = _load_pending()
         if not items:
