@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, raw: out.slice(-400) });
     }
     // after an approval, fire a fresh round so the rest of the inbox is handled
-    let nextRound: number | null = null;
+    let nextRound: number | undefined;
     if (parsed.stop_reason === "sent") {
       const child = spawn(PYTHON_BIN, [`${REPO_ROOT}/agent/cli.py`, "run"], {
         cwd: REPO_ROOT,
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         stdio: "ignore",
       });
       child.unref();
-      nextRound = child.pid;
+      nextRound = child.pid ?? undefined;
     }
     return NextResponse.json({ ok: true, result: parsed, nextRound });
   } catch (e) {
