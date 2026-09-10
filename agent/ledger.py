@@ -18,7 +18,10 @@ GENESIS = "0" * 64
 
 
 def _canonical(obj: dict) -> str:
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"))
+    # ensure_ascii=False: the TS side must never re-derive this (it cannot
+    # reproduce Python's \uXXXX escaping); verification lives HERE, the single
+    # writer, and its verdict is published to chain.json for the UI to display.
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
 def _digest(prev: str, payload: dict) -> str:
@@ -53,7 +56,17 @@ class Ledger:
         self.rows.append(row)
         with open(self.path, "a") as f:
             f.write(_canonical(row) + "\n")
+        self._publish_chain()
         return row
+
+    def _publish_chain(self) -> None:
+        """Authoritative verify verdict, written on every append."""
+        verdict = self.verify()
+        verdict["head"] = self.prev_hash
+        verdict["ts"] = round(time.time(), 3)
+        chain_path = os.path.join(os.path.dirname(self.path), "chain.json")
+        with open(chain_path, "w") as f:
+            json.dump(verdict, f, indent=2)
 
     def verify(self) -> dict:
         """Re-walk the chain; returns {ok, rows, first_bad_seq}."""

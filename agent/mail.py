@@ -14,6 +14,7 @@ import os
 import smtplib
 import urllib.request
 from email.message import EmailMessage
+from email.utils import make_msgid
 
 SMTP_HOST = os.environ.get("VERGER_SMTP_HOST", "localhost")
 SMTP_PORT = int(os.environ.get("VERGER_SMTP_PORT", "1025"))
@@ -26,6 +27,7 @@ def send_mail(to: str, subject: str, body: str) -> str:
     msg["From"] = ORG_ADDRESS
     msg["To"] = to
     msg["Subject"] = subject
+    msg["Message-ID"] = make_msgid(domain=ORG_ADDRESS.split("@")[1])
     msg.set_content(body)
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
         s.send_message(msg)
