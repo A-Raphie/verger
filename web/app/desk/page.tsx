@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function DeskPage() {
-  const state = readState();
+export default async function DeskPage() {
+  const state = await readState();
   return (
     <main className="min-h-screen">
       <TopBar />

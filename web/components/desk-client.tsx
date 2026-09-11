@@ -50,7 +50,10 @@ export function DeskClient({ initialState }: { initialState: State }) {
   }, []);
 
   useEffect(() => {
-    const t = setInterval(refresh, 4000);
+    // Poll only while the tab is visible; hidden tabs burn edge requests (60s cap, was 4s)
+    const t = setInterval(() => {
+      if (document.visibilityState === "visible") refresh();
+    }, 60000);
     return () => clearInterval(t);
   }, [refresh]);
 
@@ -58,13 +61,35 @@ export function DeskClient({ initialState }: { initialState: State }) {
     setRoundWorking(true);
     setFlash(null);
     try {
-      await fetch("/api/run", { method: "POST" });
-      setFlash("The round started. Verger reads the inbox on its own; the bell rings if it needs you.");
-      setTimeout(() => void refresh(), 2500);
+      // A round is chunked: one inbox message per call (serverless budget).
+      // The desk chains chunks so a full round still reads as one motion.
+      for (let i = 0; i < 12; i++) {
+        const res = await fetch("/api/run", { method: "POST" });
+        const out = await res.json();
+        if (!out.ok) {
+          setFlash(`The round hit an error: ${out.error ?? "unknown"}`);
+          break;
+        }
+        if (out.kind === "held") {
+          setFlash(
+            `Verger drafted a reply to ${out.to} and is holding it for your yes below.`,
+          );
+          break;
+        }
+        if (out.kind === "done") {
+          setFlash("Round complete. The porch shows anything waiting on you.");
+          break;
+        }
+        if (out.kind === "handled") {
+          setFlash(`Handled: ${out.from} (${out.how}). Moving to the next…`);
+          await refresh();
+        }
+      }
+      await refresh();
     } catch {
       setFlash("Could not start the round. Try again.");
     } finally {
-      setTimeout(() => setRoundWorking(false), 1500);
+      setRoundWorking(false);
     }
   };
 
@@ -81,9 +106,11 @@ export function DeskClient({ initialState }: { initialState: State }) {
       if (out.ok) {
         setFlash(
           decision === "approve"
-            ? `Approved. The reply went out: ${item.reason.subject ?? ""} · receipt recorded. A fresh round is reading the rest of the inbox.`
+            ? `Approved. The reply went out: ${item.reason.subject ?? ""} · receipt recorded. The round continues below.`
             : `Denied. Verger was told no; the draft was cancelled and the denial is on the ledger.`,
         );
+        // a decision unblocks the round: keep chaining
+        setTimeout(() => void runRound(), 800);
       } else {
         setFlash(`The decision did not land: ${out.error ?? "unknown error"}`);
       }

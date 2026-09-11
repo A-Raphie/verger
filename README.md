@@ -5,55 +5,55 @@ inbox end to end under its policy, and every autonomous action leaves a
 hash-chained receipt a human can audit. It runs on its own and holds each send
 for the trustee's explicit yes.
 
-**Built for the AWS Agents for Humans hackathon** (Strands Agents SDK). Built
-by [Raphie](https://x.com/a_raphie).
+**Built for the AWS Agents for Humans hackathon** (Strands Agents SDK,
+TypeScript). Built by [Raphie](https://x.com/a_raphie).
+
+Live: https://vergerdesk.netlify.app
 
 ## The shape
 
-- `agent/` : the Strands agent (Python). Tools: read_inbox, read_message,
-  send_mail. The send gate is a Strands hook (`BeforeToolCallEvent`): allowlist
-  check, then an interrupt that pauses the whole loop until the trustee
-  decides. Interrupt state persists across processes via `FileSessionManager`,
-  so approvals can land hours later.
-- `agent/ledger.py` : append-only sha256 hash chain of receipts; the agent
-  publishes its own verify verdict (`chain.json`) on every append.
-- `web/` : the desk. Front door + decision porch + receipt ledger, reading the
-  agent's real state files. No mock data anywhere.
+- `web/lib/verger.ts` : the agent, on the Strands Agents TypeScript SDK
+  (`@strands-agents/sdk`). Tools: read_message, send_mail, no_reply. The gate
+  is a `BeforeToolCallEvent` hook: allowlist check first, then a Strands
+  interrupt that raises `stopReason: "interrupt"` so nothing is sent without
+  the trustee.
+- `web/lib/blobs.ts` : all state in Netlify Blobs. The demo mailbox, the sent
+  folder, the receipt ledger, the pending decisions. No server, no disk, no
+  trial clocks.
+- `web/lib/ledger.ts` : append-only sha256 hash chain; the ledger verifies
+  itself on every append and the UI displays that verdict (it never re-derives
+  hashes client-side).
+- `web/netlify/functions/round.mts` : scheduled function; unattended rounds on
+  a 10-minute tick.
+- Rounds are chunked: one inbox message per function invocation (serverless
+  budget), chained by the desk so a full round still reads as one motion.
+- Trustee decisions execute deterministically: the pending item holds the
+  exact draft, approval sends precisely what was shown, denial records the
+  refusal. Both land on the ledger.
 
-## Run it
+## Local
 
 ```
-brew install mailpit && mailpit &                  # SMTP :1025, API :8025
-python3.12 -m venv .venv
-VIRTUAL_ENV=.venv uv pip install strands-agents openai python-dotenv pillow
-cp a .env with GROQ_API_KEY (or set BEDROCK creds after redeeming hackathon credits)
-python agent/seed.py                               # synthetic org inbox
-./.venv/bin/python agent/cli.py run                # unattended round; pauses at the gate
-./.venv/bin/python agent/cli.py pending            # what waits for the trustee
-./.venv/bin/python agent/cli.py decide <id> approve
-./.venv/bin/python agent/cli.py verify             # re-walk the chain
-cd web && bun run dev                              # the desk on :3001
+cd web && bun install && bun run build
+netlify dev     # Blobs need the Netlify runtime
 ```
-
-Scheduled rounds: `./agent/loop.sh` (every 30 min by default). The mail server
-is Mailpit in the demo; the Gmail IMAP adapter is a documented integration
-slice, not faked.
 
 ## Honesty table
 
 | Claim | Truth |
 |---|---|
-| "Answers the inbox end to end" | Proven: 5 real SMTP messages read, 4 replies sent on camera |
+| "Answers the inbox end to end" | Proven live: agent reads, drafts, sends after approval |
 | "Nothing leaves without your yes" | Enforced by a Strands interrupt at the tool-call layer; deny path proven too |
-| "Receipt for every action" | 17-row sha256 chain, verified by the agent on every write |
-| "Runs on a schedule" | `agent/loop.sh` runs unattended rounds on an interval |
-| Reads a REAL external mailbox | Spike runs on Mailpit (real SMTP server, local). Gmail IMAP adapter is the next integration slice |
-| Model | Groq gpt-oss-20b via OpenAI-compatible API ($0). Bedrock + AgentCore deploy lands when the hackathon's $50 credit code is redeemed |
-| Known drafts flaw | One draft invented shift times before the facts policy was tightened; the gate is why drafts are reviewed |
+| "Receipt for every action" | sha256 hash chain in Blobs, verified by the writer on every append |
+| "Runs on a schedule" | Netlify scheduled function, every 10 minutes |
+| Mail transport | Demo mailbox served from Blobs (synthetic org, sanctioned by the event FAQ). The Gmail IMAP adapter is the documented next slice; the tool interface stays identical |
+| Model | Groq (OpenAI-compatible endpoint) for $0 builds; Bedrock is a config swap once the hackathon's AWS credits are redeemed |
+| Trustee decisions | Deterministic execution of the exact approved draft, by design, after session-resume proved flaky across serverless boundaries |
+| Known drafts flaw | Early drafts invented shift times before the facts policy was tightened; the gate is why drafts are reviewed |
 
-## The canonical-form migration (disclosed)
+## History
 
-On Sep 9 the ledger's canonical JSON changed to `ensure_ascii=False` after 14
-spike rows were written; `agent/migrate_resign.py` re-signed those rows in
-order. Legitimate on test data only; a production ledger would start a new
-genesis instead.
+The first spike was a Python Strands agent against a local Mailpit SMTP server
+(`agent/`, kept for reference). The shipped product is the TypeScript agent
+above: same gate, same ledger, rebuilt for serverless so the demo cannot die
+with an infrastructure trial.

@@ -10,8 +10,8 @@ function timeOf(ts: number) {
   return new Date(ts * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export default function FrontDoor() {
-  const s = readState();
+export default async function FrontDoor() {
+  const s = await readState();
   const latest = s.receipts.slice(0, 3);
 
   return (
