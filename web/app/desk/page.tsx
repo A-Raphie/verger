@@ -4,7 +4,7 @@ import { DeskClient } from "@/components/desk-client";
 import { readState } from "@/lib/state";
 
 export const metadata: Metadata = {
-  title: "The desk · Verger",
+  title: "The desk",
   description:
     "Approve what Verger drafted, deny what it should not send, and read the receipt ledger.",
 };

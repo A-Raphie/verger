@@ -71,6 +71,10 @@ export function DeskClient({ initialState }: { initialState: State }) {
           setFlash(`The round hit an error: ${out.error ?? "unknown"}`);
           break;
         }
+        if (out.kind === "busy") {
+          setFlash("Another round is already running. Give it a few seconds.");
+          break;
+        }
         if (out.kind === "held") {
           setFlash(
             `Verger drafted a reply to ${out.to} and is holding it for your yes below.`,

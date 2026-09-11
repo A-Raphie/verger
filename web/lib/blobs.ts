@@ -100,6 +100,26 @@ export async function getRoundMessages(): Promise<unknown[]> {
   return getJSON<unknown[]>("round:messages", []);
 }
 
+// Single-flight lock so a scheduled tick and a desk-chained round never race
+// the mailbox (concurrent claims were producing duplicate holds).
+export async function acquireRoundLock(owner: string): Promise<boolean> {
+  const existing = await store().get("lock:round", { type: "text" });
+  if (existing) {
+    const prev = JSON.parse(existing) as { owner: string; ts: number };
+    if (Date.now() - prev.ts < 60_000 && prev.owner !== owner) return false;
+  }
+  await store().set("lock:round", JSON.stringify({ owner, ts: Date.now() }));
+  const check = await store().get("lock:round", { type: "text" });
+  return check ? (JSON.parse(check) as { owner: string }).owner === owner : false;
+}
+
+export async function releaseRoundLock(owner: string): Promise<void> {
+  const existing = await store().get("lock:round", { type: "text" });
+  if (!existing) return;
+  const cur = JSON.parse(existing) as { owner: string };
+  if (cur.owner === owner) await store().remove("lock:round");
+}
+
 export async function setRoundMessages(messages: unknown[]): Promise<void> {
   await setJSON("round:messages", messages);
 }

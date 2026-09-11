@@ -65,6 +65,18 @@ function buildModel() {
 }
 
 export async function processNextMessage(): Promise<ChunkResult> {
+  const owner = `chunk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  if (!(await acquireRoundLock(owner))) {
+    return { kind: "busy", note: "another round is running" };
+  }
+  try {
+    return await processNextMessageLocked(owner);
+  } finally {
+    await releaseRoundLock(owner);
+  }
+}
+
+async function processNextMessageLocked(owner: string): Promise<ChunkResult> {
   const mailbox = await getMailbox();
   const next = mailbox.find((m: MailMessage) => !m.handled);
   if (!next) {
@@ -174,8 +186,11 @@ export async function processNextMessage(): Promise<ChunkResult> {
       };
       heldPendingId = intr.id;
       heldInfo = { to: reason.to ?? "", subject: reason.subject ?? "" };
-      pending[intr.id] = {
-        id: intr.id,
+      // keyed by MESSAGE id: one message can never hold twice, even if two
+      // rounds raced (they cannot any more, but belt and braces)
+      const key = `msg:${next.id}`;
+      pending[key] = {
+        id: key,
         name: intr.name,
         reason,
       };
