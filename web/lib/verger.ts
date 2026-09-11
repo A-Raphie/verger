@@ -39,13 +39,12 @@ const ALLOWLIST: Record<string, string> = {
 
 const SYSTEM_PROMPT = `You are Verger, the front-desk agent for ${ORG_NAME} (desk@foodbank.local), a volunteer-run community food project. You keep the org's inbox alive so trustees don't have to.
 
-You handle ONE inbox message per turn. For the message you were given:
-1. read_message to see it in full if you need more than the summary.
-2. Decide: routine question, judgment call, or spam.
-3. Routine: send_mail with a warm, short, specific reply (under 120 words).
-4. Judgment call (dates, money, access, safety): still send_mail, and say in one leading sentence that the trustee will confirm.
-5. FACTS POLICY (absolute): never state a time, date, quantity, price, name, or CAPABILITY that was not in the message or given to you. This includes promises like "we do deliver" or "shifts start at 9" unless the message said so. For any such detail, write that the trustee will confirm it. An invented detail is the worst thing you can do.
-6. Spam: call no_reply and move on.
+The full text of ONE inbox message is given to you with each request. Decide: routine question, judgment call, or spam.
+
+1. Routine: send_mail with a warm, short, specific reply (under 120 words).
+2. Judgment call (dates, money, access, safety): still send_mail, and say in one leading sentence that the trustee will confirm.
+3. FACTS POLICY (absolute): never state a time, date, quantity, price, name, or CAPABILITY that was not in the message or given to you. This includes promises like "we do deliver" or "shifts start at 9" unless the message said so. For any such detail, write that the trustee will confirm it. An invented detail is the worst thing you can do.
+4. Spam: call no_reply and move on.
 
 You reply to people, never lecture them.`;
 
@@ -75,18 +74,6 @@ export async function processNextMessage(): Promise<ChunkResult> {
 
   let heldPendingId: string | null = null;
   let heldInfo = { to: "", subject: "" };
-
-  const readMessage = tool({
-    name: "read_message",
-    description: "Read the full text of the inbox message you are handling.",
-    inputSchema: z.object({}),
-    callback: async () => {
-      const fresh = (await getMailbox()).find((m) => m.id === next.id);
-      return fresh
-        ? { from: fresh.from, subject: fresh.subject, body: fresh.body }
-        : { error: "message vanished" };
-    },
-  });
 
   const sendMail = tool({
     name: "send_mail",
@@ -137,7 +124,7 @@ export async function processNextMessage(): Promise<ChunkResult> {
   const agent = new Agent({
     model: buildModel(),
     systemPrompt: SYSTEM_PROMPT,
-    tools: [readMessage, sendMail, noReply],
+    tools: [sendMail, noReply],
     printer: false,
     messages: (await getRoundMessages()) as never,
   });
@@ -171,7 +158,7 @@ export async function processNextMessage(): Promise<ChunkResult> {
   });
 
   const result = await agent.invoke(
-    `Handle this inbox message. From: ${next.from} | Subject: ${next.subject}`,
+    `Handle this inbox message.\nFrom: ${next.from}\nSubject: ${next.subject}\nReceived: ${new Date(next.receivedAt).toISOString()}\n\n${next.body}`,
   );
 
   // carry the conversation forward for the next chunk of this round
