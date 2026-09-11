@@ -6,11 +6,9 @@ import {
   addSent,
   getMailbox,
   getPending,
-  getRoundMessages,
   releaseRoundLock,
   setMailbox,
   setPending,
-  setRoundMessages,
   type MailMessage,
 } from "./blobs";
 import { appendReceipt, markHandled } from "./ledger";
@@ -83,7 +81,6 @@ async function processNextMessageLocked(owner: string): Promise<ChunkResult> {
   const mailbox = await getMailbox();
   const next = mailbox.find((m: MailMessage) => !m.handled);
   if (!next) {
-    await setRoundMessages([]);
     return { kind: "done", note: "inbox clear" };
   }
 
@@ -136,12 +133,14 @@ async function processNextMessageLocked(owner: string): Promise<ChunkResult> {
     },
   });
 
+  // Fresh agent per chunk: each message is handled independently. Shared
+  // conversation history made the model answer the PREVIOUS sender while
+  // processing the current message (caught in ship-rehearsal).
   const agent = new Agent({
     model: buildModel(),
     systemPrompt: SYSTEM_PROMPT,
     tools: [sendMail, noReply],
     printer: false,
-    messages: (await getRoundMessages()) as never,
   });
 
   // The gate: allowlist is the hard floor, then a Strands interrupt pauses the
@@ -175,9 +174,6 @@ async function processNextMessageLocked(owner: string): Promise<ChunkResult> {
   const result = await agent.invoke(
     `Handle this inbox message.\nFrom: ${next.from}\nSubject: ${next.subject}\nReceived: ${new Date(next.receivedAt).toISOString()}\n\n${next.body}`,
   );
-
-  // carry the conversation forward for the next chunk of this round
-  await setRoundMessages(agent.messages);
 
   if (result.stopReason === "interrupt") {
     const pending = await getPending();
