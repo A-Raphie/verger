@@ -99,6 +99,7 @@ export default async function FrontDoor() {
             <h2 className="font-semibold text-ink">What Verger does</h2>
             <ul className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-ink-2">
               <li>Reads the org inbox on a schedule and answers routine email end to end</li>
+              <li>Shows you every word of every draft before it can possibly go out</li>
               <li>Chases missing details and files what arrived</li>
               <li>Leaves a receipt for every action, hash-chained in order</li>
               <li>Rings the bell only when a real judgment call needs a human</li>
@@ -109,7 +110,6 @@ export default async function FrontDoor() {
             <ul className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-ink-2">
               <li>Send a single email without the trustee&apos;s explicit yes</li>
               <li>Write to anyone outside the trustee&apos;s allowlist</li>
-              <li>Invent facts about the organization to sound helpful</li>
               <li>Act without leaving a receipt a human can audit later</li>
             </ul>
           </Card>
@@ -150,8 +150,8 @@ export default async function FrontDoor() {
         </Link>
       </section>
 
-      <footer className="border-t border-line py-8 text-center text-xs text-ink-3">
-        Verger · built by{" "}
+      <footer className="border-t border-line py-8 text-center text-xs text-ink-2">
+        Verger · demo organization and inbox are synthetic · built by{" "}
         <a
           href="https://x.com/a_raphie"
           target="_blank"

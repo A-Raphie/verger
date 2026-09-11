@@ -20,7 +20,7 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "Verger",
+    default: "Verger \u00b7 the front-desk agent for volunteer-run organizations",
     template: "%s · Verger",
   },
   description:

@@ -25,6 +25,7 @@ export function DeskClient({ initialState }: { initialState: State }) {
   const [error, setError] = useState<string | null>(null);
   const [roundWorking, setRoundWorking] = useState(false);
   const [decidingId, setDecidingId] = useState<string | null>(null);
+  const [armedDenyId, setArmedDenyId] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [ringKey, setRingKey] = useState<string | undefined>(undefined);
   const knownPending = useRef<Set<string>>(
@@ -94,6 +95,13 @@ export function DeskClient({ initialState }: { initialState: State }) {
   };
 
   const decide = async (item: PendingItem, decision: "approve" | "deny") => {
+    // Deny is irreversible (the message is handled forever): arm first.
+    if (decision === "deny" && armedDenyId !== item.id) {
+      setArmedDenyId(item.id);
+      setTimeout(() => setArmedDenyId((cur) => (cur === item.id ? null : cur)), 4000);
+      return;
+    }
+    setArmedDenyId(null);
     setDecidingId(item.id);
     setFlash(null);
     try {
@@ -212,11 +220,11 @@ export function DeskClient({ initialState }: { initialState: State }) {
                     {decidingId === p.id ? "Sending…" : "Approve · send it"}
                   </button>
                   <button
-                    className="btn btn-ghost text-sm"
+                    className={`btn text-sm ${armedDenyId === p.id ? "border border-error bg-error text-white" : "btn-ghost"}`}
                     onClick={() => void decide(p, "deny")}
                     disabled={decidingId === p.id}
                   >
-                    {decidingId === p.id ? "Working…" : "Deny"}
+                    {decidingId === p.id ? "Working…" : armedDenyId === p.id ? "Confirm deny" : "Deny"}
                   </button>
                 </div>
               </Card>
@@ -288,7 +296,7 @@ export function DeskClient({ initialState }: { initialState: State }) {
       </section>
 
       <p className="mt-14 text-center text-xs text-ink-3">
-        <Link href="/" className="underline underline-offset-2 hover:text-accent">
+        <Link href="/" className="text-ink-2 underline underline-offset-2 hover:text-accent">
           Back to the front door
         </Link>
       </p>

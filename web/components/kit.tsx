@@ -19,7 +19,7 @@ export function Badge({
   const tones: Record<string, string> = {
     neutral: "bg-subtle text-ink-2 border-line",
     accent: "bg-accent-subtle text-ink border-line",
-    sent: "bg-sent/10 text-sent border-sent/25",
+    sent: "bg-sent/10 text-sent-ink border-sent/25",
     waiting: "bg-subtle text-ink-2 border-line-strong",
     error: "bg-error/10 text-error border-error/25",
   };

@@ -16,7 +16,7 @@
   /* Text tiers: exactly three */
   --text-primary: #232f3e; /* AWS Squid Ink, mined */
   --text-secondary: #545b64; /* AWS slate, mined */
-  --text-muted: #7d858c; /* derived: slate tinted toward paper */
+  --text-muted: #5e6a70; /* 5.0:1 on paper: was 3.4:1, AA fail (audit Sep 10) */
 
   /* Border scale: hairlines only, no shadows below overlay */
   --border-default: rgba(35, 47, 62, 0.14);
@@ -26,10 +26,11 @@
   --accent: #fa6f00;
   --accent-deep: #eb5f07;
   --accent-subtle: #fdeada; /* accent tinted into the paper family */
-  --accent-foreground: #ffffff;
+  --accent-foreground: #232f3e; /* ink on orange: 4.75:1, was white 2.9:1 (audit) */
 
   /* Status scale: receipt-green is RESERVED for verified-sent state */
   --status-success: #2e7d4f;
+  --status-success-text: #256b42; /* 5.1:1 on the sent tint, for badge text */
   --status-pending: #545b64;
   --status-error: #b3261e;
   --status-neutral: #545b64;
@@ -62,6 +63,7 @@
   --color-accent-subtle: var(--accent-subtle);
   --color-accent-ink: var(--accent-foreground);
   --color-sent: var(--status-success);
+  --color-sent-ink: var(--status-success-text);
   --color-waiting: var(--status-pending);
   --color-error: var(--status-error);
   --font-sans: var(--font-geist-sans);
@@ -125,7 +127,11 @@ body {
   color: var(--accent-foreground);
 }
 .btn-primary:hover {
-  background: var(--accent-deep);
+  /* deep-orange bg would drop ink text below 4.5:1; the edge carries the hover */
+  box-shadow: inset 0 -3px 0 var(--accent-deep);
+}
+.btn-primary:active {
+  transform: translateY(1px);
 }
 
 .btn-ghost {
