@@ -117,7 +117,7 @@ export async function releaseRoundLock(owner: string): Promise<void> {
   const existing = await store().get("lock:round", { type: "text" });
   if (!existing) return;
   const cur = JSON.parse(existing) as { owner: string };
-  if (cur.owner === owner) await store().remove("lock:round");
+  if (cur.owner === owner) await store().delete("lock:round");
 }
 
 export async function setRoundMessages(messages: unknown[]): Promise<void> {

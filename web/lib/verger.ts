@@ -2,10 +2,12 @@ import { Agent, tool, BeforeToolCallEvent } from "@strands-agents/sdk";
 import { OpenAIModel } from "@strands-agents/sdk/models/openai";
 import { z } from "zod";
 import {
+  acquireRoundLock,
   addSent,
   getMailbox,
   getPending,
   getRoundMessages,
+  releaseRoundLock,
   setMailbox,
   setPending,
   setRoundMessages,
@@ -51,7 +53,8 @@ You reply to people, never lecture them.`;
 export type ChunkResult =
   | { kind: "done"; note: string }
   | { kind: "held"; pendingId: string; to: string; subject: string }
-  | { kind: "handled"; how: string; from: string; subject: string };
+  | { kind: "handled"; how: string; from: string; subject: string }
+  | { kind: "busy"; note: string };
 
 function buildModel() {
   const apiKey = process.env.GROQ_API_KEY;
