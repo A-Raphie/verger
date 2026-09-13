@@ -17,11 +17,11 @@ Oct 8 · winners around Oct 14.
 
 **Builder series on AWS Builder Center:**
 
-1. Agents for Humans: Building Verger, the front-desk agent volunteers can trust
+1. [Agents for Humans: Building Verger, the front-desk agent volunteers can trust](https://builder.aws.com/content/3JGhTH6duJnx7UhGQm7K1AHItqd/agents-for-humans-building-verger-the-front-desk-agent-volunteers-can-trust)
 2. Agents for Humans: pausing an AI agent mid-run with Strands interrupts
 3. Agents for Humans: hash-chained receipts for AI agent actions
 
-(links added as each publishes)
+(link 1 published; 2 and 3 follow)
 
 ## The shape
 
