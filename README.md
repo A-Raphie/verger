@@ -68,3 +68,26 @@ The first spike was a Python Strands agent against a local Mailpit SMTP server
 (`agent/`, kept for reference). The shipped product is the TypeScript agent
 above: same gate, same ledger, rebuilt for serverless so the demo cannot die
 with an infrastructure trial.
+
+## Salvage
+
+What lifts cleanly into the next build:
+
+- `web/lib/verger.ts` : the TrusteeGate pattern. A `BeforeToolCallEvent` hook
+  that checks a tool allowlist, then raises a Strands interrupt so the agent
+  physically pauses mid-run; the trustee's decision executes deterministically
+  (approve sends the exact reviewed draft, deny retires the paused session).
+  The reusable shape for any gated-autonomy agent.
+- `web/lib/ledger.ts` : append-only sha256 hash chain that verifies itself on
+  every append and publishes its own verdict (`chain.json`). The UI displays
+  the writer's verdict and never re-derives hashes.
+- `web/lib/blobs.ts` : Netlify Blobs store layout plus a single-flight round
+  lock (owner token, TTL) that lets a cron worker and a human desk share a
+  work queue without double-holds.
+- `web/netlify/functions/round.mts` : one-message-per-invocation chunking,
+  chained by the desk client, to fit agent rounds inside serverless timeouts.
+- `demo-take/` : the demo machinery. `take-config.json` (scene list),
+  `vo-beats.json` (VO beat timing), `scripts/` (recording helpers).
+- `submission/gen_*.py` : Pillow generators for the architecture diagram and
+  the 3:2 project card, on the token palette, with textlength auto-fit.
+
