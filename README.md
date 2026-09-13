@@ -10,6 +10,19 @@ TypeScript). Built by [Raphie](https://x.com/a_raphie).
 
 Live: https://vergerdesk.netlify.app
 
+Demo video: https://vimeo.com/1226324265
+
+**Hackathon timeline:** submissions close Sep 14, 5:00pm PT · judging Sep 15 to
+Oct 8 · winners around Oct 14.
+
+**Builder series on AWS Builder Center:**
+
+1. Agents for Humans: Building Verger, the front-desk agent volunteers can trust
+2. Agents for Humans: pausing an AI agent mid-run with Strands interrupts
+3. Agents for Humans: hash-chained receipts for AI agent actions
+
+(links added as each publishes)
+
 ## The shape
 
 - `web/lib/verger.ts` : the agent, on the Strands Agents TypeScript SDK
