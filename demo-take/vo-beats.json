@@ -1,0 +1,54 @@
+{
+ "total": 159.76025,
+ "plan": [
+  {
+   "scene": "S1 hook",
+   "start": 0.0,
+   "end": 18.68,
+   "dur": 18.68,
+   "words": 49
+  },
+  {
+   "scene": "S2 boundary",
+   "start": 18.68,
+   "end": 44.68,
+   "dur": 26.0,
+   "words": 70
+  },
+  {
+   "scene": "S3 live round + gate",
+   "start": 44.68,
+   "end": 83.0,
+   "dur": 38.32,
+   "words": 98
+  },
+  {
+   "scene": "S4 receipts",
+   "start": 83.0,
+   "end": 100.54,
+   "dur": 17.54,
+   "words": 45
+  },
+  {
+   "scene": "S5 approve",
+   "start": 100.54,
+   "end": 128.31,
+   "dur": 27.77,
+   "words": 74
+  },
+  {
+   "scene": "S6 unattended",
+   "start": 128.31,
+   "end": 145.33,
+   "dur": 17.02,
+   "words": 42
+  },
+  {
+   "scene": "S7 close",
+   "start": 145.33,
+   "end": 159.76025,
+   "dur": 14.43,
+   "words": 41
+  }
+ ]
+}

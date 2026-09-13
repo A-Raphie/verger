@@ -1,0 +1,379 @@
+{
+  "driver": "http://127.0.0.1:9333",
+  "cdp": "http://127.0.0.1:9222",
+  "voDir": "/Users/raphie/Documents/Hackathons/verger/demo-take/beats",
+  "outDir": "/Users/raphie/Documents/Hackathons/verger/demo-take/out",
+  "final": "/Users/raphie/Documents/Hackathons/verger/demo-take/final.mp4",
+  "cursorPark": "0,1111",
+  "recorder": "avfoundation",
+  "avDevice": 2,
+  "avScale": 2,
+  "locators": {
+    "runRound": "[...document.querySelectorAll('button')].find(e=>e.textContent.trim()==='Run a round')",
+    "approve": "[...document.querySelectorAll('button')].find(e=>e.textContent.trim().startsWith('Approve'))",
+    "bell": "document.querySelector(\"span[title*='trustee'], span[title*='Silent']\")",
+    "neverSend": "[...document.querySelectorAll('li')].find(e=>/never send without a yes/i.test(e.textContent))",
+    "neverAllowlist": "[...document.querySelectorAll('li')].find(e=>/never write outside/i.test(e.textContent))",
+    "neverReceipt": "[...document.querySelectorAll('li')].find(e=>/never act without leaving/i.test(e.textContent))",
+    "showsEveryWord": "[...document.querySelectorAll('li')].find(e=>/shows you every word/i.test(e.textContent))",
+    "boundarySection": "[...document.querySelectorAll('h2')].find(e=>/What Verger does/i.test(e.textContent))",
+    "livePanel": "[...document.querySelectorAll('span')].find(e=>/LIVE DESK/i.test(e.textContent))",
+    "ledgerBadge": "[...document.querySelectorAll('span')].find(e=>/chain verified/i.test(e.textContent))",
+    "porchCard": "[...document.querySelectorAll('span')].find(e=>e.textContent.trim()==='Needs your yes')",
+    "heroH1": "document.querySelector('h1')"
+  },
+  "scenes": {
+    "1": {
+      "name": "hero",
+      "prep": [
+        {
+          "t": "goto",
+          "url": "https://vergerdesk.netlify.app/"
+        },
+        {
+          "t": "hold",
+          "ms": 7000
+        },
+        {
+          "t": "cmove",
+          "x": 995,
+          "y": 786
+        }
+      ],
+      "actions": [
+        {
+          "t": "hold",
+          "ms": 2600
+        },
+        {
+          "t": "cmove",
+          "x": 660,
+          "y": 854
+        },
+        {
+          "t": "hold",
+          "ms": 1800
+        },
+        {
+          "t": "cmove",
+          "x": 995,
+          "y": 994
+        },
+        {
+          "t": "wheel",
+          "dy": 260
+        },
+        {
+          "t": "hold",
+          "ms": 3500
+        }
+      ]
+    },
+    "2": {
+      "name": "boundary",
+      "prep": [
+        {
+          "t": "goto",
+          "url": "https://vergerdesk.netlify.app/"
+        },
+        {
+          "t": "hold",
+          "ms": 6000
+        }
+      ],
+      "actions": [
+        {
+          "t": "wheel",
+          "dy": 900
+        },
+        {
+          "t": "hold",
+          "ms": 1500
+        },
+        {
+          "t": "cmove",
+          "x": 700,
+          "y": 400
+        },
+        {
+          "t": "hoverJs",
+          "find": "showsEveryWord"
+        },
+        {
+          "t": "hold",
+          "ms": 2200
+        },
+        {
+          "t": "hoverJs",
+          "find": "neverSend"
+        },
+        {
+          "t": "hold",
+          "ms": 2600
+        },
+        {
+          "t": "hoverJs",
+          "find": "neverAllowlist"
+        },
+        {
+          "t": "hold",
+          "ms": 2400
+        },
+        {
+          "t": "hoverJs",
+          "find": "neverReceipt"
+        },
+        {
+          "t": "hold",
+          "ms": 4000
+        }
+      ]
+    },
+    "3": {
+      "name": "live-round-gate",
+      "prep": [
+        {
+          "t": "goto",
+          "url": "https://vergerdesk.netlify.app/"
+        },
+        {
+          "t": "hold",
+          "ms": 8000
+        }
+      ],
+      "actions": [
+        {
+          "t": "navClick",
+          "label": "Open the desk"
+        },
+        {
+          "t": "waitText",
+          "re": "Decision porch"
+        },
+        {
+          "t": "hold",
+          "ms": 2000
+        },
+        {
+          "t": "clickJs",
+          "find": "runRound"
+        },
+        {
+          "t": "hold",
+          "ms": 4000
+        },
+        {
+          "t": "cmove",
+          "x": 855,
+          "y": 300
+        },
+        {
+          "t": "hold",
+          "ms": 5000
+        },
+        {
+          "t": "cmove",
+          "x": 855,
+          "y": 380
+        },
+        {
+          "t": "waitText",
+          "re": "Needs your yes"
+        },
+        {
+          "t": "hold",
+          "ms": 2500
+        },
+        {
+          "t": "hoverJs",
+          "find": "porchCard"
+        },
+        {
+          "t": "hold",
+          "ms": 2500
+        },
+        {
+          "t": "hoverJs",
+          "find": "bell"
+        },
+        {
+          "t": "hold",
+          "ms": 2000
+        }
+      ]
+    },
+    "4": {
+      "name": "receipts",
+      "prep": [
+        {
+          "t": "hold",
+          "ms": 1500
+        },
+        {
+          "t": "scrollTo",
+          "find": "ledgerBadge"
+        },
+        {
+          "t": "hold",
+          "ms": 1500
+        }
+      ],
+      "actions": [
+        {
+          "t": "hoverJs",
+          "find": "ledgerBadge"
+        },
+        {
+          "t": "hold",
+          "ms": 3500
+        },
+        {
+          "t": "wheel",
+          "dy": 240
+        },
+        {
+          "t": "hold",
+          "ms": 3000
+        },
+        {
+          "t": "wheel",
+          "dy": -240
+        },
+        {
+          "t": "hold",
+          "ms": 3000
+        }
+      ]
+    },
+    "5": {
+      "name": "approve",
+      "prep": [
+        {
+          "t": "scrollTo",
+          "find": "porchCard"
+        },
+        {
+          "t": "hold",
+          "ms": 2500
+        }
+      ],
+      "actions": [
+        {
+          "t": "cmove",
+          "x": 855,
+          "y": 420
+        },
+        {
+          "t": "hold",
+          "ms": 1500
+        },
+        {
+          "t": "cmove",
+          "x": 855,
+          "y": 500
+        },
+        {
+          "t": "hold",
+          "ms": 1200
+        },
+        {
+          "t": "clickJs",
+          "find": "approve"
+        },
+        {
+          "t": "hold",
+          "ms": 3000
+        },
+        {
+          "t": "cmove",
+          "x": 855,
+          "y": 700
+        },
+        {
+          "t": "hold",
+          "ms": 2000
+        },
+        {
+          "t": "cmove",
+          "x": 855,
+          "y": 850
+        },
+        {
+          "t": "waitText",
+          "re": "Needs your yes"
+        },
+        {
+          "t": "hoverJs",
+          "find": "porchCard"
+        },
+        {
+          "t": "hold",
+          "ms": 1500
+        }
+      ]
+    },
+    "6": {
+      "name": "unattended",
+      "prep": [
+        {
+          "t": "hold",
+          "ms": 2500
+        },
+        {
+          "t": "scrollTo",
+          "find": "porchCard"
+        },
+        {
+          "t": "hold",
+          "ms": 2500
+        }
+      ],
+      "actions": [
+        {
+          "t": "hoverJs",
+          "find": "bell"
+        },
+        {
+          "t": "hold",
+          "ms": 4000
+        },
+        {
+          "t": "cmove",
+          "x": 720,
+          "y": 470
+        },
+        {
+          "t": "hold",
+          "ms": 5000
+        }
+      ]
+    },
+    "7": {
+      "name": "close",
+      "prep": [
+        {
+          "t": "goto",
+          "url": "https://github.com/A-Raphie/verger"
+        },
+        {
+          "t": "hold",
+          "ms": 9000
+        }
+      ],
+      "actions": [
+        {
+          "t": "wheel",
+          "dy": 450
+        },
+        {
+          "t": "hold",
+          "ms": 3500
+        },
+        {
+          "t": "hold",
+          "ms": 4000
+        }
+      ]
+    }
+  }
+}

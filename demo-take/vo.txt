@@ -1,0 +1,13 @@
+Last night, while the volunteers slept, an AI answered the inbox of a community food bank. Every reply it drafted stopped at the same line: nothing is sent until a human says yes. This is Verger, the front desk agent for organizations that run on trust and volunteer hours.
+
+Here is the whole promise, in writing. Verger reads the inbox, drafts the replies, and shows you every word before anything goes out. It will never send without a yes. It will never write outside an allowlist. And it will never act without leaving a receipt a human can audit. Most AI demos show you what an agent can do. This one shows you what it is allowed to do.
+
+Now watch it work. This is the trustee's desk, live. I press run a round, and Verger starts reading. It finds a message from a volunteer, and drafts the answer. But look: the send is a tool call, and a hook in the Strands agent stops it cold with an interrupt. The bell rings once. The reply waits on the porch, and nothing moves until I decide. The whole round runs in small steps on a serverless function, and the agent's memory survives between them, so it can pause for hours and pick up exactly where it stopped.
+
+Underneath, the receipts. Every read, every draft, every hold, written to a hash chain: each row signed against the one before it. The badge says verified because the agent checks its own chain again on every write. This page never computes it. The agent does.
+
+Time to be the trustee. I read the draft. It is polite, it is correct, and it does not invent a single fact. I approve, and the reply goes out over real email. The receipt lands on the chain before the button stops glowing. Watch the numbers: answered ticks up by one, waiting drops, and the ledger grows. And if I had said no, the draft would be dead, right here, on the record.
+
+One more thing. I did not tell it to continue. It started the next message on its own, and it will hold that one too. Verger runs unattended on a schedule, so Monday morning is already answered before the coffee is on.
+
+Verger runs on the open source Strands Agents SDK from AWS, on a demo inbox for this video, ready for a real mailbox. Trust arrives by receipt, not by promise. The live desk and the full source are on screen now.

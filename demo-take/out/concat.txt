@@ -1,0 +1,7 @@
+file '/Users/raphie/Documents/Hackathons/verger/demo-take/out/seg1.mp4'
+file '/Users/raphie/Documents/Hackathons/verger/demo-take/out/seg2.mp4'
+file '/Users/raphie/Documents/Hackathons/verger/demo-take/out/seg3.mp4'
+file '/Users/raphie/Documents/Hackathons/verger/demo-take/out/seg4.mp4'
+file '/Users/raphie/Documents/Hackathons/verger/demo-take/out/seg5.mp4'
+file '/Users/raphie/Documents/Hackathons/verger/demo-take/out/seg6.mp4'
+file '/Users/raphie/Documents/Hackathons/verger/demo-take/out/seg7.mp4'
