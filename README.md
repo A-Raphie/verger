@@ -18,15 +18,13 @@ Oct 8 · winners around Oct 14.
 **Builder series on AWS Builder Center:**
 
 1. [Agents for Humans: Building Verger, the front-desk agent volunteers can trust](https://builder.aws.com/content/3JGhTH6duJnx7UhGQm7K1AHItqd/agents-for-humans-building-verger-the-front-desk-agent-volunteers-can-trust)
-2. Agents for Humans: pausing an AI agent mid-run with Strands interrupts
-3. Agents for Humans: hash-chained receipts for AI agent actions
-
-(link 1 published; 2 and 3 follow)
+2. [Agents for Humans: pausing an AI agent mid-run with Strands interrupts](https://builder.aws.com/content/3JGj7b1Ypl1xVzQ8DbQdtQ0IJ5g/agents-for-humans-pausing-an-ai-agent-mid-run-with-strands-interrupts)
+3. [Agents for Humans: hash-chained receipts for AI agent actions](https://builder.aws.com/content/3JHdktKAz4tmmQ9i3FIBSsCvKgK/agents-for-humans-hash-chained-receipts-for-ai-agent-actions)
 
 ## The shape
 
 - `web/lib/verger.ts` : the agent, on the Strands Agents TypeScript SDK
-  (`@strands-agents/sdk`). Tools: read_message, send_mail, no_reply. The gate
+  (`@strands-agents/sdk`). Tools: send_mail, no_reply. The gate
   is a `BeforeToolCallEvent` hook: allowlist check first, then a Strands
   interrupt that raises `stopReason: "interrupt"` so nothing is sent without
   the trustee.
